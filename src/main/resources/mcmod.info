@@ -1,0 +1,16 @@
+[
+{
+  "modid": "portablejukebox",
+  "name": "Portable Jukebox",
+  "description": "A small mod for grooving on the go.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Yeelp"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

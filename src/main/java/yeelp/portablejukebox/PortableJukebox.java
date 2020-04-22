@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 @Mod(modid = ModConsts.MODID, name = ModConsts.MODNAME, version = ModConsts.VERSION)
 public class PortableJukebox
 {
-    private static final boolean DEBUG_ON = false;
+    private static final boolean DEBUG_ON = true;
     private static Logger logger;
     
     @Mod.Instance
@@ -32,7 +32,7 @@ public class PortableJukebox
     	{
     		info("PortableJukebox has entered debug mode! Enable debug messages in the console!");
     	}
-        TestRunner.run();
+        //TestRunner.run();
         proxy.preInit(event);
     }
 

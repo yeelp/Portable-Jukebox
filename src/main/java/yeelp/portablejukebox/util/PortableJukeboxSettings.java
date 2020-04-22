@@ -48,8 +48,8 @@ public class PortableJukeboxSettings
 	 */
 	public PortableJukeboxSettings(PlayStyle playStyle, RepeatStyle repeatStyle, Collection<ItemStack> tracks)
 	{
-		this.playStyle = playStyle;
-		this.repeatStyle = repeatStyle;
+		this.playStyle = playStyle != null ? playStyle : PlayStyle.NORMAL;
+		this.repeatStyle = repeatStyle != null ? repeatStyle : RepeatStyle.NONE;
 		List<ItemStack> temp = new LinkedList<ItemStack>();
 		//We can't modify the tracks Collection directly, as it is backed by the NonNullMap; changes will be reflected in the map.
 		//So we copy the references over (which is fine to do), then shuffle if needed.
@@ -91,5 +91,11 @@ public class PortableJukeboxSettings
 				
 		}
 		return next;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return String.format("%s, %s, %s", this.playStyle.toString(), this.repeatStyle.toString(), this.queue.toString());
 	}
 }

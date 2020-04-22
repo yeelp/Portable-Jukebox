@@ -55,4 +55,19 @@ public class MusicQueue
 	{
 		return queue.size();
 	}
+	
+	@Override
+	public String toString()
+	{
+		String str = "[";
+		for(ItemStack i : queue)
+		{
+			if(str.length() != 1)
+			{
+				str += ", ";
+			}
+			str += i.getItem().getUnlocalizedName();
+		}
+		return str + "]";
+	}
 }

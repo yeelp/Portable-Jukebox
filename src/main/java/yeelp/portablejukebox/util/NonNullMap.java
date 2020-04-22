@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.util.NonNullList;
 
 /**
@@ -36,8 +38,8 @@ public class NonNullMap<Key, Value> extends AbstractMap<Key, Value> implements M
 	public NonNullMap(Value defaultVal)
 	{
 		this.defaultVal = defaultVal;
-		keys = new ArrayList<Key>();
-		vals = NonNullList.<Value>create();
+		this.keys = new ArrayList<Key>();
+		this.vals = NonNullList.<Value>create();
 	}
 	
 	/**
@@ -47,13 +49,17 @@ public class NonNullMap<Key, Value> extends AbstractMap<Key, Value> implements M
 	 */
 	public NonNullMap(Value defaultVal, Key...keys)
 	{
+		this(defaultVal);
 		this.keys = Arrays.asList(keys);
-		vals = NonNullList.<Value>create();
 		for(int i = 0;  i < keys.length; i++)
 		{
 			vals.add(defaultVal);
 		}
-		this.defaultVal = defaultVal;
+	}
+	
+	public Value getDefaultValue()
+	{
+		return this.defaultVal;
 	}
 	
 	@Override
@@ -96,6 +102,7 @@ public class NonNullMap<Key, Value> extends AbstractMap<Key, Value> implements M
 	 * 
 	 * <p> For the NonNullMap, if the key has no mapping, the default value is returned instead.
 	 */
+	@Override
 	public Value get(Object key) 
 	{
 		int index = keys.indexOf(key);
@@ -120,7 +127,28 @@ public class NonNullMap<Key, Value> extends AbstractMap<Key, Value> implements M
 		}
 	}
 	@Override
+	@Nullable
 	public Value remove(Object key) 
+	{
+		int index = keys.indexOf(key);
+		if(index == -1)
+		{
+			return null;
+		}
+		else
+		{
+			Value val = vals.remove(index);
+			keys.remove(index);
+			return val;
+		}
+	}
+	/**
+	 * Maps the specified key to the default value, and returns whatever the original value associated with this key was.
+	 * @param key the key that should have its mapping set to the default value.
+	 * @return the value once associated with this key This method returns null if, and only if, this map never contained the specified key.
+	 */
+	@Nullable
+	public Value setDefault(Object key)
 	{
 		int index = keys.indexOf(key);
 		if(index == -1)
@@ -148,16 +176,32 @@ public class NonNullMap<Key, Value> extends AbstractMap<Key, Value> implements M
 		keys = new ArrayList<Key>();
 		vals = NonNullList.<Value>create();
 	}
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * <p> The NonNullMap does not have its key set backed by the map
+	 */
 	@Override
 	public Set<Key> keySet() 
 	{
 		return super.keySet();
 	}
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * <p> The NonNullMap does not have its values collection backed by the map
+	 */
 	@Override
 	public Collection<Value> values() 
 	{
 		return super.values();
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * <p> The NonNullMap does not have its entry set backed by the map
+	 */
 	@Override
 	public Set<Entry<Key, Value>> entrySet() 
 	{

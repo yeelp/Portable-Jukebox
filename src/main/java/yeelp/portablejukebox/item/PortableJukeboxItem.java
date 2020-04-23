@@ -28,8 +28,6 @@ import yeelp.portablejukebox.util.PortableJukeboxSettings.RepeatStyle;
 public class PortableJukeboxItem extends Item
 {
 	private PortableJukeboxSettings settings;
-	private PlayStyle playStyle;
-	private RepeatStyle repeatStyle;
 	
 	public PortableJukeboxItem()
 	{
@@ -43,7 +41,7 @@ public class PortableJukeboxItem extends Item
 	{
 		if(stack.getItem() instanceof PortableJukeboxItem)
 		{
-			return new PortableJukeboxProvider();
+			return new PortableJukeboxSettings();
 		}
 		return null;
 	}
@@ -59,7 +57,7 @@ public class PortableJukeboxItem extends Item
 		else
 		{
 			//TODO When right clicked and NOT sneaking, setup a PortableJukeboxSettings object, and play the music 
-			settings = new PortableJukeboxSettings(playStyle, repeatStyle, playerIn.getHeldItemMainhand().getCapability(PortableJukeboxProvider.class, null).items());
+			settings = new PortableJukeboxSettings(new PlayConfiguration(), );
 			PortableJukebox.debug(settings.toString());
 			return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, playerIn.getHeldItemMainhand());
 		}

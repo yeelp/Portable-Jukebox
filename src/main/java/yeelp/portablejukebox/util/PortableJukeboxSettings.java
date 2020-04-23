@@ -6,78 +6,89 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.items.IItemHandler;
+import yeelp.portablejukebox.util.PlayConfiguration.PlayStyle;
 
 /**
  * Simple container to store portable jukebox settings
  * @author Yeelp
  *
  */
-public class PortableJukeboxSettings 
+public class PortableJukeboxSettings implements IPortableJukeboxSettings
 {
-	/**
-	 * The different play styles of the portable jukebox. Can be NORMAL or SHUFFLE
-	 * @author Yeelp
-	 *
-	 */
-	public enum PlayStyle
-	{
-		NORMAL,
-		SHUFFLE;
-	}
-	
-	/**
-	 * The Different Repeat styles of the portable jukebox. Can be NONE, ALL, or SINGLE
-	 * @author Yeelp
-	 *
-	 */
-	public enum RepeatStyle
-	{
-		NONE,
-		ALL,
-		SINGLE;
-	}
-	
-	private PlayStyle playStyle;
-	private RepeatStyle repeatStyle;
 	private MusicQueue queue;
-	/**
-	 * Setup a new PortableJukeboxSettings
-	 * @param playStyle The play style. NORMAL or SHUFFLE
-	 * @param repeatStyle The repeat style. NONE, ALL or SINGLE
-	 * @param tracks the list of contents from the PortableJukebox. Empty entries will be parsed out be the constructor.
-	 */
-	public PortableJukeboxSettings(PlayStyle playStyle, RepeatStyle repeatStyle, Collection<ItemStack> tracks)
+	private PlayConfiguration playConfiguration;
+	private PortableJukeboxInventory inv;
+	
+	public PortableJukeboxSettings()
 	{
-		this.playStyle = playStyle != null ? playStyle : PlayStyle.NORMAL;
-		this.repeatStyle = repeatStyle != null ? repeatStyle : RepeatStyle.NONE;
+		
+	}
+	
+	/**
+	 * Create a new PortableJukeboxSettings
+	 * @param pc The PlayConfiguration
+	 * @param inv The PortableJukeboxInventory
+	 */
+	public PortableJukeboxSettings(PlayConfiguration pc, PortableJukeboxInventory inv)
+	{
+		this.inv = inv;
+		this.playConfiguration = pc;
 		List<ItemStack> temp = new LinkedList<ItemStack>();
 		//We can't modify the tracks Collection directly, as it is backed by the NonNullMap; changes will be reflected in the map.
 		//So we copy the references over (which is fine to do), then shuffle if needed.
-		for(ItemStack stack : tracks)
+		for(ItemStack stack : inv.items())
 		{
 			if(!stack.isEmpty())
 			{
 				temp.add(stack);
 			}
 		}
-		if(playStyle == PlayStyle.SHUFFLE)
+		if(pc.getPlayStyle() == PlayStyle.SHUFFLE)
 		{
 			Collections.shuffle(temp);
 		}
 		this.queue = new MusicQueue(temp);
 	}
-	/**
-	 * Get the next track to play
-	 * @return the next Item Stack specified by this PortableJukeboxSettings
-	 */
+	
+	public void update()
+	{
+		List<ItemStack> temp = new LinkedList<ItemStack>();
+		//We can't modify the tracks Collection directly, as it is backed by the NonNullMap; changes will be reflected in the map.
+		//So we copy the references over (which is fine to do), then shuffle if needed.
+		for(ItemStack stack : inv.items())
+		{
+			if(!stack.isEmpty())
+			{
+				temp.add(stack);
+			}
+		}
+		if(this.getPlayConfiguration().getPlayStyle() == PlayStyle.SHUFFLE)
+		{
+			Collections.shuffle(temp);
+		}
+		this.queue = new MusicQueue(temp);
+	}
+	
+	@Override
+	public PlayConfiguration getPlayConfiguration()
+	{
+		return this.playConfiguration;
+	}
+	
+	@Override
 	public ItemStack getNextTrack()
 	{
+		PlayConfiguration pc = this.getPlayConfiguration();
 	   	ItemStack next = null;
 		if(this.queue.size() == 0)
 		{
 			return ItemStack.EMPTY;
 		}
-		switch(this.repeatStyle)
+		switch(pc.getRepeatStyle())
 		{
 			case SINGLE:
 				next = this.queue.peek();
@@ -96,6 +107,36 @@ public class PortableJukeboxSettings
 	@Override
 	public String toString()
 	{
-		return String.format("%s, %s, %s", this.playStyle.toString(), this.repeatStyle.toString(), this.queue.toString());
+		return String.format("%s, %s, %s", this.getPlayConfiguration().getPlayStyle().toString(), this.getPlayConfiguration().getRepeatStyle().toString(), this.queue.toString());
+	}
+
+	@Override
+	public boolean hasCapability(Capability<?> capability, EnumFacing facing) 
+	{
+		return capability == PortableJukeboxSettingsProvider.pjbs;
+	}
+
+	@Override
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NBTTagCompound serializeNBT() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deserializeNBT(NBTTagCompound nbt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public IItemHandler getContents() 
+	{
+		return this.inv;
 	}
 }

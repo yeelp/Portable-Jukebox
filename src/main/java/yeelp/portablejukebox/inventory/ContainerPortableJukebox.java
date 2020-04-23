@@ -8,7 +8,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
+import yeelp.portablejukebox.PortableJukebox;
 import yeelp.portablejukebox.item.PortableJukeboxItem;
+import yeelp.portablejukebox.util.PortableJukeboxSettingsProvider;
 
 /**
  * Container for the Portable Jukebox
@@ -27,7 +29,8 @@ public class ContainerPortableJukebox extends Container
 	 */
 	public ContainerPortableJukebox(IInventory playerInventory, ItemStack jukebox)
 	{
-		this.jukebox = jukebox.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+		this.jukebox = PortableJukeboxSettingsProvider.get(jukebox).getContents();
+		PortableJukebox.debug(""+this.jukebox.getSlots());
 		this.numRows = 1;
 		this.yOffset = (this.numRows - 4) * 18;
 		initSlots(playerInventory, this.jukebox);

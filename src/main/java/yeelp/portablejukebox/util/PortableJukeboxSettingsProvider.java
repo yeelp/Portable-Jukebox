@@ -1,5 +1,6 @@
 package yeelp.portablejukebox.util;
 
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 
@@ -10,8 +11,8 @@ public class PortableJukeboxSettingsProvider
 	
 	private IPortableJukeboxSettings instance =  pjbs.getDefaultInstance();
 	
-	public static IPortableJukeboxSettings get(PortableJukeboxSettings settings)
+	public static IPortableJukeboxSettings get(ItemStack stack)
 	{
-		return settings.getCapability(pjbs, null);
+		return stack.getCapability(pjbs, null);
 	}
 }

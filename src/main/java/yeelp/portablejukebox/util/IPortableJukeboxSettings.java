@@ -1,5 +1,6 @@
 package yeelp.portablejukebox.util;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -30,4 +31,32 @@ public interface IPortableJukeboxSettings extends ICapabilitySerializable<NBTTag
 	 * @return the play configuration
 	 */
 	PlayConfiguration getPlayConfiguration();
+	
+	/**
+	 * Update the settings
+	 */
+	void update();
+	
+	/**
+	 * Play music for this player
+	 * @param player player to play music for.
+	 */
+	void play(EntityPlayer player);
+	
+	/**
+	 * Stop music
+	 */
+	void stop();
+	
+	/**
+	 * Is there music playing?
+	 * @return true if there is music playing. False otherwise
+	 */
+	boolean isPlaying();
+	
+	/**
+	 * Get currently playing music
+	 * @return music playing
+	 */
+	PortableMusic getMusicPlaying();
 }

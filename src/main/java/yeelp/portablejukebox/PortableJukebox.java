@@ -56,7 +56,7 @@ public class PortableJukebox
     {
     	if(DEBUG_ON)
     	{
-    		logger.debug("[PORTABLE JUKEBOX]" + msg);
+    		logger.info("[PORTABLE JUKEBOX]" + msg);
     	}
     }
     
@@ -77,4 +77,13 @@ public class PortableJukebox
     {
     	logger.fatal("[PORTABLE JUKEBOX] " + msg);
     }
+
+    /**
+     * output a message at the warning level
+     * @param msg output message
+     */
+	public static void warn(String msg) 
+	{
+		logger.warn("[PORTABLE JUKEBOX] " + msg);
+	}
 }

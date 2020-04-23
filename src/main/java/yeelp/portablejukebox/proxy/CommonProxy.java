@@ -10,7 +10,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import yeelp.portablejukebox.PortableJukebox;
 import yeelp.portablejukebox.handler.GuiHandler;
+import yeelp.portablejukebox.handler.MusicHandler;
 import yeelp.portablejukebox.item.PortableJukeboxItem;
+import yeelp.portablejukebox.util.PortableJukeboxSettings;
 
 /**
  * PortableJukebox Proxy
@@ -26,7 +28,7 @@ public abstract class CommonProxy
 	 */
 	public void preInit(FMLPreInitializationEvent evt)
 	{
-		
+		PortableJukeboxSettings.register();
 	}
 	
 	/**
@@ -36,6 +38,7 @@ public abstract class CommonProxy
 	public void init(FMLInitializationEvent evt)
 	{
 		NetworkRegistry.INSTANCE.registerGuiHandler(PortableJukebox.instance, new GuiHandler());
+		new MusicHandler().register();
 	}
 	
 	/**

@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 /**
  * A Filter to accept or reject objects of a certain class
  * @author Yeelp
@@ -68,5 +70,23 @@ public class MultiFilter
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Classify an object against the filters.
+	 * @param o object to classify
+	 * @return The first Class instance in the MultiFilter's filters that matched against the object's class, or null, if no such class matched.
+	 */
+	@Nullable
+	public Class classify(Object o)
+	{
+		for(Class clazz : filters)
+		{
+			if(clazz.isInstance(o))
+			{
+				return clazz;
+			}
+		}
+		return null;
 	}
 }

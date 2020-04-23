@@ -1,11 +1,13 @@
 package yeelp.portablejukebox.item;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemRecord;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
@@ -14,26 +16,31 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import yeelp.portablejukebox.ModConsts;
 import yeelp.portablejukebox.PortableJukebox;
 import yeelp.portablejukebox.handler.GuiHandler;
-import yeelp.portablejukebox.util.MultiFilter;
-import yeelp.portablejukebox.util.NonNullMap;
-import yeelp.portablejukebox.util.PortableJukeboxProvider;
+import yeelp.portablejukebox.handler.MusicHandler;
+import yeelp.portablejukebox.util.IPortableJukeboxSettings;
 import yeelp.portablejukebox.util.PortableJukeboxSettings;
-import yeelp.portablejukebox.util.PortableJukeboxSettings.PlayStyle;
-import yeelp.portablejukebox.util.PortableJukeboxSettings.RepeatStyle;
+import yeelp.portablejukebox.util.PortableJukeboxSettingsProvider;
 
 public class PortableJukeboxItem extends Item
-{
-	private PortableJukeboxSettings settings;
-	
+{	
 	public PortableJukeboxItem()
 	{
 		this.setRegistryName("portablejukebox");
 		this.setUnlocalizedName(ModConsts.MODID + ".portablejukebox");
 		this.setCreativeTab(CreativeTabs.MISC);
+		this.setMaxStackSize(1);
+	}
+	
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
+	{
+		tooltip.add("Use while sneaking to add/remove records.");
+		tooltip.add("Use normally to play/stop music");
 	}
 
 	@Override
@@ -51,15 +58,34 @@ public class PortableJukeboxItem extends Item
 	{
 		if(playerIn.isSneaking())
 		{
+			IPortableJukeboxSettings settings = PortableJukeboxSettingsProvider.get(playerIn.getHeldItem(handIn));
+			if(settings.isPlaying())
+			{
+				settings.stop();
+			}
 			playerIn.openGui(PortableJukebox.instance, GuiHandler.PORTABLEJUKEBOX_ID, playerIn.world, 0, 0, 0);
-			return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, playerIn.getHeldItemMainhand());
+			settings.update();
+			PortableJukebox.debug(settings.toString());
+			return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
 		}
 		else
 		{
-			//TODO When right clicked and NOT sneaking, setup a PortableJukeboxSettings object, and play the music 
-			settings = new PortableJukeboxSettings(new PlayConfiguration(), );
-			PortableJukebox.debug(settings.toString());
-			return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, playerIn.getHeldItemMainhand());
+			if(!worldIn.isRemote)
+			{
+				IPortableJukeboxSettings settings = PortableJukeboxSettingsProvider.get(playerIn.getHeldItem(handIn));
+				settings.update();
+				PortableJukebox.debug(((PortableJukeboxSettings) settings).toString());
+				if(settings.isPlaying())
+				{
+					settings.stop();
+				}
+				else
+				{
+					MusicHandler.stopAllJukeboxes(playerIn);
+					settings.play(playerIn);
+				}
+			}
+			return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
 		}
 	}
 	

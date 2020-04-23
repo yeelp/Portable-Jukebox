@@ -4,13 +4,25 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
+import javax.annotation.Nullable;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.SoundEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.Capability.IStorage;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.items.IItemHandler;
 import yeelp.portablejukebox.util.PlayConfiguration.PlayStyle;
+import yeelp.portablejukebox.util.PlayConfiguration.RepeatStyle;
 
 /**
  * Simple container to store portable jukebox settings
@@ -22,43 +34,19 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings
 	private MusicQueue queue;
 	private PlayConfiguration playConfiguration;
 	private PortableJukeboxInventory inv;
+	private boolean isPlaying = false;
+	private PortableMusic nowPlaying;
 	
 	public PortableJukeboxSettings()
 	{
-		
+		inv = new PortableJukeboxInventory();
+		playConfiguration = new PlayConfiguration(PlayStyle.NORMAL, RepeatStyle.NONE);
 	}
 	
-	/**
-	 * Create a new PortableJukeboxSettings
-	 * @param pc The PlayConfiguration
-	 * @param inv The PortableJukeboxInventory
-	 */
-	public PortableJukeboxSettings(PlayConfiguration pc, PortableJukeboxInventory inv)
-	{
-		this.inv = inv;
-		this.playConfiguration = pc;
-		List<ItemStack> temp = new LinkedList<ItemStack>();
-		//We can't modify the tracks Collection directly, as it is backed by the NonNullMap; changes will be reflected in the map.
-		//So we copy the references over (which is fine to do), then shuffle if needed.
-		for(ItemStack stack : inv.items())
-		{
-			if(!stack.isEmpty())
-			{
-				temp.add(stack);
-			}
-		}
-		if(pc.getPlayStyle() == PlayStyle.SHUFFLE)
-		{
-			Collections.shuffle(temp);
-		}
-		this.queue = new MusicQueue(temp);
-	}
-	
+	@Override
 	public void update()
 	{
 		List<ItemStack> temp = new LinkedList<ItemStack>();
-		//We can't modify the tracks Collection directly, as it is backed by the NonNullMap; changes will be reflected in the map.
-		//So we copy the references over (which is fine to do), then shuffle if needed.
 		for(ItemStack stack : inv.items())
 		{
 			if(!stack.isEmpty())
@@ -74,16 +62,57 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings
 	}
 	
 	@Override
+	public void play(EntityPlayer player)
+	{
+		ItemStack next = this.getNextTrack();
+		if(!next.isEmpty())
+		{
+			nowPlaying = new PortableMusic(player, getSoundEvent(this.getNextTrack()));
+			Minecraft.getMinecraft().getSoundHandler().stopSounds();
+			Minecraft.getMinecraft().getSoundHandler().playSound(nowPlaying);
+			isPlaying = true;
+		}
+	}
+	
+	@Override
+	public void stop()
+	{
+		if(!nowPlaying.isDonePlaying())
+		{
+			Minecraft.getMinecraft().getSoundHandler().stopSound(nowPlaying);
+			isPlaying = false;
+		}
+	}
+	
+	@Override
+	public PortableMusic getMusicPlaying()
+	{
+		return this.nowPlaying;
+	}
+	
+	@Override
+	public boolean isPlaying()
+	{
+		return this.isPlaying;
+	}
+	
+	private SoundEvent getSoundEvent(ItemStack nextTrack) 
+	{
+		return inv.getSoundEvent(nextTrack);
+	}
+
+	@Override
 	public PlayConfiguration getPlayConfiguration()
 	{
 		return this.playConfiguration;
 	}
 	
 	@Override
+	@Nullable
 	public ItemStack getNextTrack()
 	{
 		PlayConfiguration pc = this.getPlayConfiguration();
-	   	ItemStack next = null;
+	   	ItemStack next = ItemStack.EMPTY;
 		if(this.queue.size() == 0)
 		{
 			return ItemStack.EMPTY;
@@ -107,7 +136,7 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings
 	@Override
 	public String toString()
 	{
-		return String.format("%s, %s, %s", this.getPlayConfiguration().getPlayStyle().toString(), this.getPlayConfiguration().getRepeatStyle().toString(), this.queue.toString());
+		return String.format("%s, %s, %s", playConfiguration.getPlayStyle().toString(), playConfiguration.getRepeatStyle().toString(), this.queue.toString());
 	}
 
 	@Override
@@ -117,26 +146,67 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings
 	}
 
 	@Override
-	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-		// TODO Auto-generated method stub
-		return null;
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) 
+	{
+		return capability == PortableJukeboxSettingsProvider.pjbs ? PortableJukeboxSettingsProvider.pjbs.<T> cast(this) : null;
 	}
 
 	@Override
-	public NBTTagCompound serializeNBT() {
-		// TODO Auto-generated method stub
-		return null;
+	public NBTTagCompound serializeNBT() 
+	{
+		NBTTagCompound tag = new NBTTagCompound();
+		tag.setTag("contents", inv.serializeNBT());
+		tag.setTag("configuration", playConfiguration.serializeNBT());
+		return tag;
 	}
 
 	@Override
-	public void deserializeNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
-		
+	public void deserializeNBT(NBTTagCompound nbt) 
+	{
+		inv.deserializeNBT(nbt.getCompoundTag("contents"));
+		playConfiguration.deserializeNBT(nbt.getCompoundTag("configuration"));
 	}
 
 	@Override
 	public IItemHandler getContents() 
 	{
 		return this.inv;
+	}
+	
+	/**
+	 * Register this capability
+	 */
+	public static void register()
+	{
+		CapabilityManager.INSTANCE.register(IPortableJukeboxSettings.class, new SettingsStorage(), new SettingsFactory());
+	}
+
+	private static class SettingsFactory implements Callable<IPortableJukeboxSettings>
+	{
+		@Override
+		public IPortableJukeboxSettings call() throws Exception 
+		{
+			return new PortableJukeboxSettings();
+		}
+	}
+	
+	private static class SettingsStorage implements IStorage<IPortableJukeboxSettings>
+	{
+
+		@Override
+		public NBTBase writeNBT(Capability<IPortableJukeboxSettings> capability, IPortableJukeboxSettings instance, EnumFacing side) 
+		{
+			return instance.serializeNBT();
+		}
+
+		@Override
+		public void readNBT(Capability<IPortableJukeboxSettings> capability, IPortableJukeboxSettings instance, EnumFacing side, NBTBase nbt) 
+		{
+			if(nbt instanceof NBTTagCompound)
+			{
+				instance.deserializeNBT((NBTTagCompound) nbt);
+			}
+		}
+		
 	}
 }

@@ -1,11 +1,13 @@
 package yeelp.portablejukebox.handler;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.items.IItemHandler;
 import yeelp.portablejukebox.gui.PortableJukeboxGui;
 import yeelp.portablejukebox.inventory.ContainerPortableJukebox;
+import yeelp.portablejukebox.item.PortableJukeboxItem;
 
 public class GuiHandler implements IGuiHandler
 {
@@ -17,9 +19,21 @@ public class GuiHandler implements IGuiHandler
 		switch(ID)
 		{
 			case PORTABLEJUKEBOX_ID:
-				return new ContainerPortableJukebox(player.inventory, player.getHeldItemMainhand());
+				return new ContainerPortableJukebox(player.inventory, getJukebox(player));
 			default:
 				return null;
+		}
+	}
+
+	private ItemStack getJukebox(EntityPlayer player) 
+	{
+		if(player.getHeldItemMainhand().getItem() instanceof PortableJukeboxItem)
+		{
+			return player.getHeldItemMainhand();
+		}
+		else
+		{
+			return player.getHeldItemOffhand();
 		}
 	}
 

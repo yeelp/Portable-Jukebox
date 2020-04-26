@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -14,6 +15,17 @@ import net.minecraft.item.ItemStack;
 public class MusicQueue 
 {
 	private Queue<ItemStack> queue;
+	
+	public MusicQueue()
+	{
+		ItemStack a = new ItemStack(Items.RECORD_STAL);
+		ItemStack b = new ItemStack(Items.RECORD_BLOCKS);
+		ItemStack c = new ItemStack(Items.RECORD_STRAD);
+		queue = new LinkedList<ItemStack>();
+		queue.offer(a);
+		queue.offer(b);
+		queue.offer(c);
+	}
 	/**
 	 * Build a Music Queue from the items given
 	 * @param A Collection of ItemStacks, which will be records that can be played.

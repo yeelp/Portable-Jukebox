@@ -21,6 +21,8 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.items.IItemHandler;
+import yeelp.portablejukebox.PortableJukebox;
+import yeelp.portablejukebox.handler.MusicHandler;
 import yeelp.portablejukebox.util.PlayConfiguration.PlayStyle;
 import yeelp.portablejukebox.util.PlayConfiguration.RepeatStyle;
 
@@ -29,7 +31,7 @@ import yeelp.portablejukebox.util.PlayConfiguration.RepeatStyle;
  * @author Yeelp
  *
  */
-public class PortableJukeboxSettings implements IPortableJukeboxSettings
+public class PortableJukeboxSettings implements IPortableJukeboxSettings, IItemHandler
 {
 	private MusicQueue queue;
 	private PlayConfiguration playConfiguration;
@@ -40,7 +42,7 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings
 	public PortableJukeboxSettings()
 	{
 		inv = new PortableJukeboxInventory();
-		playConfiguration = new PlayConfiguration(PlayStyle.NORMAL, RepeatStyle.NONE);
+		playConfiguration = new PlayConfiguration(PlayStyle.SHUFFLE, RepeatStyle.NONE);
 	}
 	
 	@Override
@@ -58,7 +60,8 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings
 		{
 			Collections.shuffle(temp);
 		}
-		this.queue = new MusicQueue(temp);
+		//this.queue = new MusicQueue(temp);
+		this.queue = new MusicQueue();
 	}
 	
 	@Override
@@ -67,17 +70,17 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings
 		ItemStack next = this.getNextTrack();
 		if(!next.isEmpty())
 		{
-			nowPlaying = new PortableMusic(player, getSoundEvent(this.getNextTrack()));
-			Minecraft.getMinecraft().getSoundHandler().stopSounds();
-			Minecraft.getMinecraft().getSoundHandler().playSound(nowPlaying);
 			isPlaying = true;
+			nowPlaying = new PortableMusic(player, getSoundEvent(next));
+			PortableJukebox.debug("NOW PLAYING "+getSoundEvent(next).getSoundName().toString());
+			nowPlaying.play();
 		}
 	}
 	
 	@Override
 	public void stop()
 	{
-		if(!nowPlaying.isDonePlaying())
+		if(nowPlaying != null && !nowPlaying.isDonePlaying())
 		{
 			Minecraft.getMinecraft().getSoundHandler().stopSound(nowPlaying);
 			isPlaying = false;
@@ -108,14 +111,13 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings
 	}
 	
 	@Override
-	@Nullable
 	public ItemStack getNextTrack()
 	{
 		PlayConfiguration pc = this.getPlayConfiguration();
 	   	ItemStack next = ItemStack.EMPTY;
 		if(this.queue.size() == 0)
 		{
-			return ItemStack.EMPTY;
+			return next;
 		}
 		switch(pc.getRepeatStyle())
 		{
@@ -208,5 +210,35 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings
 			}
 		}
 		
+	}
+
+	@Override
+	public int getSlots() 
+	{
+		return inv.getSlots();
+	}
+
+	@Override
+	public ItemStack getStackInSlot(int slot) 
+	{
+		return inv.getStackInSlot(slot);
+	}
+
+	@Override
+	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) 
+	{
+		return inv.insertItem(slot, stack, simulate);
+	}
+
+	@Override
+	public ItemStack extractItem(int slot, int amount, boolean simulate) 
+	{
+		return inv.extractItem(slot, amount, simulate);
+	}
+
+	@Override
+	public int getSlotLimit(int slot) 
+	{
+		return inv.getSlotLimit(slot);
 	}
 }

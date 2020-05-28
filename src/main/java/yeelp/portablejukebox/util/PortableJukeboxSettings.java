@@ -42,7 +42,7 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings, IItemH
 	public PortableJukeboxSettings()
 	{
 		inv = new PortableJukeboxInventory();
-		playConfiguration = new PlayConfiguration(PlayStyle.SHUFFLE, RepeatStyle.NONE);
+		playConfiguration = new PlayConfiguration(PlayStyle.SHUFFLE, RepeatStyle.ALL);
 	}
 	
 	@Override

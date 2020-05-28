@@ -2,6 +2,7 @@ package yeelp.portablejukebox.handler;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -36,6 +37,18 @@ public class GuiHandler implements IGuiHandler
 			return player.getHeldItemOffhand();
 		}
 	}
+	
+	private EnumHand getHandWithJukebox(EntityPlayer player)
+	{
+		if(player.getHeldItemMainhand().getItem() instanceof PortableJukeboxItem)
+		{
+			return EnumHand.MAIN_HAND;
+		}
+		else
+		{
+			return EnumHand.OFF_HAND;
+		}
+	}
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) 
@@ -43,7 +56,7 @@ public class GuiHandler implements IGuiHandler
 		switch(ID)
 		{
 			case PORTABLEJUKEBOX_ID:
-				return new PortableJukeboxGui(player.inventory, new ContainerPortableJukebox(player.inventory, player.getHeldItemMainhand()));
+				return new PortableJukeboxGui(player.inventory, new ContainerPortableJukebox(player.inventory, player.getHeldItem(getHandWithJukebox(player))));
 			default:
 				return null;
 		}

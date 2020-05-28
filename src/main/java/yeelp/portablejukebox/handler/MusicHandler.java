@@ -22,14 +22,13 @@ import yeelp.portablejukebox.util.PortableMusic;
 public class MusicHandler extends Handler 
 {
 	private static final Map<UUID, IPortableJukeboxSettings> playingJukeboxes = new HashMap<UUID, IPortableJukeboxSettings>();
-	private int tick = 0;
+	private static final Map<UUID, Integer> tickMap = new HashMap<UUID, Integer>();
 	@SubscribeEvent
 	public void tick(PlayerTickEvent evt)
 	{
-		tick++;
-		IPortableJukeboxSettings jukebox = this.getPlayingJukebox(evt.player);
-		if(tick % 100 == 0)
+		if(tick(evt.player) % 100 == 0)
 		{
+			IPortableJukeboxSettings jukebox = this.getPlayingJukebox(evt.player);
 			PortableJukebox.debug("jukebox null? " + (jukebox == null));
 			if(jukebox != null)
 			{
@@ -52,8 +51,23 @@ public class MusicHandler extends Handler
 		return playingJukeboxes.get(player.getUniqueID());
 	}
 	
+	private int tick(EntityPlayer player)
+	{
+		Integer tick = tickMap.get(player.getUniqueID());
+		if(tick == null)
+		{
+			tickMap.put(player.getUniqueID(), 0);
+			return 0;
+		}
+		else
+		{
+			tickMap.put(player.getUniqueID(), ++tick);
+			return tick;
+		}
+	}
+	
 	/**
-	 * Stop all other jukeboxes player for a player
+	 * Stop all other jukeboxes for a player
 	 * @param player player to target
 	 */
 	public static void stopAllJukeboxes(EntityPlayer player)
@@ -70,9 +84,15 @@ public class MusicHandler extends Handler
 			PortableJukeboxSettingsProvider.get(player.getHeldItemOffhand()).stop();
 		}
 	}
-
+	
+	/**
+	 * Update the MusicHandler with the IPortableJukeboxSettings that are playing for a player
+	 * @param playerIn player
+	 * @param settings settings that are currently playing for a player. Null represents no jukebox playing for playerIn.
+	 */
 	public static void updatePlayingJukebox(EntityPlayer playerIn, IPortableJukeboxSettings settings)
 	{
 		playingJukeboxes.put(playerIn.getUniqueID(), settings);
+		
 	}
 }

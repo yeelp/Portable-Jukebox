@@ -3,6 +3,7 @@ package yeelp.portablejukebox.proxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import yeelp.portablejukebox.item.PortableJukeboxItem;
 
 public class ClientProxy extends CommonProxy
 {
@@ -10,6 +11,7 @@ public class ClientProxy extends CommonProxy
 	public void preInit(FMLPreInitializationEvent evt)
 	{
 		super.preInit(evt);
+		PortableJukeboxItem.registerRender();
 	}
 	
 	@Override

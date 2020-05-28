@@ -48,20 +48,18 @@ public class PortableJukeboxSettings implements IPortableJukeboxSettings, IItemH
 	@Override
 	public void update()
 	{
-		List<ItemStack> temp = new LinkedList<ItemStack>();
+		this.queue = new MusicQueue();
 		for(ItemStack stack : inv.items())
 		{
 			if(!stack.isEmpty())
 			{
-				temp.add(stack);
+				queue.enqueue(stack);
 			}
 		}
 		if(this.getPlayConfiguration().getPlayStyle() == PlayStyle.SHUFFLE)
 		{
-			Collections.shuffle(temp);
+			this.queue.shuffle();
 		}
-		//this.queue = new MusicQueue(temp);
-		this.queue = new MusicQueue();
 	}
 	
 	@Override

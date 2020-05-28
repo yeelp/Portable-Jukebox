@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,6 +15,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
@@ -28,6 +30,7 @@ import yeelp.portablejukebox.util.PortableJukeboxSettingsProvider;
 
 public class PortableJukeboxItem extends Item
 {	
+	private static final PortableJukeboxItem INSTANCE = new PortableJukeboxItem();
 	public PortableJukeboxItem()
 	{
 		this.setRegistryName("portablejukebox");
@@ -78,11 +81,13 @@ public class PortableJukeboxItem extends Item
 				if(settings.isPlaying())
 				{
 					settings.stop();
+					MusicHandler.updatePlayingJukebox(playerIn, null);
 				}
 				else
 				{
 					MusicHandler.stopAllJukeboxes(playerIn);
 					settings.play(playerIn);
+					MusicHandler.updatePlayingJukebox(playerIn, settings);
 				}
 			}
 			return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
@@ -94,6 +99,11 @@ public class PortableJukeboxItem extends Item
 	 */
 	public static void register()
 	{
-		ForgeRegistries.ITEMS.register(new PortableJukeboxItem());
+		ForgeRegistries.ITEMS.register(INSTANCE);
+	}
+	
+	public static void registerRender()
+	{
+		ModelLoader.setCustomModelResourceLocation(INSTANCE,  0, new ModelResourceLocation(INSTANCE.getRegistryName(), "inventory"));
 	}
 }

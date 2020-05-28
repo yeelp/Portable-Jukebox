@@ -1,6 +1,9 @@
 package yeelp.portablejukebox.handler;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -18,15 +21,17 @@ import yeelp.portablejukebox.util.PortableMusic;
 
 public class MusicHandler extends Handler 
 {
+	private static final Map<UUID, IPortableJukeboxSettings> playingJukeboxes = new HashMap<UUID, IPortableJukeboxSettings>();
 	private int tick = 0;
 	@SubscribeEvent
 	public void tick(PlayerTickEvent evt)
 	{
 		tick++;
 		IPortableJukeboxSettings jukebox = this.getPlayingJukebox(evt.player);
-		if(jukebox != null)
+		if(tick % 100 == 0)
 		{
-			if(tick % 100 == 0)
+			PortableJukebox.debug("jukebox null? " + (jukebox == null));
+			if(jukebox != null)
 			{
 				PortableJukebox.debug("Jukebox Playing? "+jukebox.isPlaying());
 				if(jukebox.isPlaying())
@@ -44,26 +49,7 @@ public class MusicHandler extends Handler
 	@Nullable
 	private IPortableJukeboxSettings getPlayingJukebox(EntityPlayer player) 
 	{
-		for(ItemStack i : player.inventory.mainInventory)
-		{
-			if(i.getItem() instanceof PortableJukeboxItem)
-			{
-				IPortableJukeboxSettings settings = PortableJukeboxSettingsProvider.get(i);
-				if(settings.isPlaying())
-				{
-					return settings;
-				}
-			}
-		}
-		if(player.getHeldItemOffhand().getItem() instanceof PortableJukeboxItem)
-		{
-			IPortableJukeboxSettings settings = PortableJukeboxSettingsProvider.get(player.getHeldItemOffhand());
-			if(settings.isPlaying())
-			{
-				return settings;
-			}
-		}
-		return null;
+		return playingJukeboxes.get(player.getUniqueID());
 	}
 	
 	/**
@@ -83,5 +69,10 @@ public class MusicHandler extends Handler
 		{
 			PortableJukeboxSettingsProvider.get(player.getHeldItemOffhand()).stop();
 		}
+	}
+
+	public static void updatePlayingJukebox(EntityPlayer playerIn, IPortableJukeboxSettings settings)
+	{
+		playingJukeboxes.put(playerIn.getUniqueID(), settings);
 	}
 }

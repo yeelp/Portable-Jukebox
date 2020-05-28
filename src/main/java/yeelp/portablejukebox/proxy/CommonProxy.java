@@ -29,6 +29,7 @@ public abstract class CommonProxy
 	public void preInit(FMLPreInitializationEvent evt)
 	{
 		PortableJukeboxSettings.register();
+		PortableJukeboxItem.register();
 	}
 	
 	/**
@@ -48,12 +49,5 @@ public abstract class CommonProxy
 	public void postInit(FMLPostInitializationEvent evt)
 	{
 		
-	}
-	
-	
-	@SubscribeEvent
-	public static final void registerItems(RegistryEvent.Register<Item> evt)
-	{
-		evt.getRegistry().register(new PortableJukeboxItem());
 	}
 }

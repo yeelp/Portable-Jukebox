@@ -1,8 +1,11 @@
 package yeelp.portablejukebox.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Random;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -16,24 +19,14 @@ public class MusicQueue
 {
 	private Queue<ItemStack> queue;
 	
+	/**
+	 * Build a new Music Queue
+	 */
 	public MusicQueue()
 	{
-		ItemStack a = new ItemStack(Items.RECORD_STAL);
-		ItemStack b = new ItemStack(Items.RECORD_BLOCKS);
-		ItemStack c = new ItemStack(Items.RECORD_STRAD);
-		queue = new LinkedList<ItemStack>();
-		queue.offer(a);
-		queue.offer(b);
-		queue.offer(c);
-	}
-	/**
-	 * Build a Music Queue from the items given
-	 * @param A Collection of ItemStacks, which will be records that can be played.
-	 */
-	public MusicQueue(Collection<ItemStack> items)
-	{
 		queue = new LinkedList<ItemStack>();
 	}
+
 	/**
 	 * Dequeue an item
 	 * @return The item dequeued. Can be null if the queue is empty.
@@ -66,6 +59,21 @@ public class MusicQueue
 	public int size()
 	{
 		return queue.size();
+	}
+	
+	/**
+	 * Shuffle the queue.
+	 */
+	public void shuffle()
+	{
+		ArrayList<ItemStack> lst = new ArrayList<ItemStack>();
+		lst.addAll(queue);
+		Collections.shuffle(lst, new Random(System.currentTimeMillis()));
+		queue.clear();
+		for (ItemStack itemStack : lst)
+		{
+			enqueue(itemStack);
+		}
 	}
 	
 	@Override

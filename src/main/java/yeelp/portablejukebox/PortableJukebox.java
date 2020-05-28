@@ -30,7 +30,7 @@ public class PortableJukebox
         logger = event.getModLog();
         if(DEBUG_ON)
     	{
-    		info("PortableJukebox has entered debug mode! Enable debug messages in the console!");
+    		info("PortableJukebox has entered debug mode!");
     	}
         //TestRunner.run();
         proxy.preInit(event);

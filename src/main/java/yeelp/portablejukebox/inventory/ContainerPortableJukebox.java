@@ -10,6 +10,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import yeelp.portablejukebox.PortableJukebox;
 import yeelp.portablejukebox.item.PortableJukeboxItem;
+import yeelp.portablejukebox.util.IPortableJukeboxSettings;
 import yeelp.portablejukebox.util.PortableJukeboxSettingsProvider;
 
 /**
@@ -19,7 +20,7 @@ import yeelp.portablejukebox.util.PortableJukeboxSettingsProvider;
  */
 public class ContainerPortableJukebox extends Container 
 {
-	private final IItemHandler jukebox;
+	private final IPortableJukeboxSettings jukebox;
 	private final int numRows;
 	private final int yOffset;
 	/**
@@ -29,11 +30,16 @@ public class ContainerPortableJukebox extends Container
 	 */
 	public ContainerPortableJukebox(IInventory playerInventory, ItemStack jukebox)
 	{
-		this.jukebox = PortableJukeboxSettingsProvider.get(jukebox).getContents();
-		PortableJukebox.debug(""+this.jukebox.getSlots());
+		this.jukebox = PortableJukeboxSettingsProvider.get(jukebox);
+		PortableJukebox.debug(""+this.jukebox.getContents().getSlots());
 		this.numRows = 1;
-		this.yOffset = (this.numRows - 4) * 18;
-		initSlots(playerInventory, this.jukebox);
+		this.yOffset = 17;//(this.numRows - 4) * 18;
+		initSlots(playerInventory, this.jukebox.getContents());
+	}
+	
+	public IPortableJukeboxSettings getSettings()
+	{
+		return this.jukebox;
 	}
 	
 	private void initSlots(IInventory inv, IItemHandler item)
@@ -48,25 +54,22 @@ public class ContainerPortableJukebox extends Container
         {
             for (int col = 0; col < 9; col++)
             {
-                this.addSlotToContainer(new Slot(inv, col + row * 9 + 9, 8 + col * 18, 103 + row * 18 + yOffset));
+                this.addSlotToContainer(new Slot(inv, col + row * 9 + 9, 160 + col * 18, 103 + row * 18 + yOffset));
             }
         }
 
         //Hotbar
         for (int hotbar = 0; hotbar < 9; hotbar++)
         {
-            this.addSlotToContainer(new Slot(inv, hotbar, 8 + hotbar * 18, 161 + yOffset));
+            this.addSlotToContainer(new Slot(inv, hotbar, 160 + hotbar * 18, 161 + yOffset));
         }
 	}
 
 	private void addJukeboxSlots(IItemHandler item) 
 	{
-		for (int j = 0; j < this.numRows; ++j)
+		for (int k = 0; k < 9; ++k)
 	    {
-			for (int k = 0; k < 9; ++k)
-	        {
-	            this.addSlotToContainer(new SlotItemHandler(item, k + j * 9, 8 + k * 18, 18 + j * 18));
-	        }
+	        this.addSlotToContainer(new SlotItemHandler(item, k, 160 + k * 18, 89));
 	    }
 	}
 

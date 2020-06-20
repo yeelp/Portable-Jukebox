@@ -1,3 +1,9 @@
-item.portablejukebox.portablejukebox=Portable Jukebox
+item.portablejukebox.portablejukebox.name=Portable Jukebox
 
 text.portablejukebox.nowplaying=Now Playing: %s
+
+button.portablejukebox.repeatone=REPEAT: SINGLE
+button.portablejukebox.repeatall=REPEAT: ALL
+button.portablejukebox.repeatnone=REPEAT: NONE
+button.portablejukebox.shuffleon=SHUFFLE: ON
+button.portablejukebox.shuffleoff=SHUFFLE: OFF
